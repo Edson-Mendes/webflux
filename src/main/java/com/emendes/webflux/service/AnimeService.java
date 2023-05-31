@@ -26,6 +26,10 @@ public class AnimeService {
         .switchIfEmpty(monoResponseStatusNotFoundException());
   }
 
+  public Mono<Anime> save(Anime anime) {
+    return animeRepository.save(anime);
+  }
+
   public <T> Mono<T> monoResponseStatusNotFoundException() {
     return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Anime not found"));
   }
