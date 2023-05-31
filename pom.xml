@@ -16,7 +16,7 @@
 
 	<properties>
 		<java.version>17</java.version>
-		<blockhound.version>1.0.6.RELEASE</blockhound.version>
+		<blockhound.version>1.0.8.RELEASE</blockhound.version>
 		<r2dbc-postgresql.version>0.8.13.RELEASE</r2dbc-postgresql.version>
 	</properties>
 

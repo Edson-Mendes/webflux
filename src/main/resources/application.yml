@@ -3,3 +3,13 @@ spring:
     url: r2dbc:postgresql://localhost:5432/webflux-db
     username: root
     password: root
+
+logging:
+  level:
+    org:
+      springframework:
+          r2dbc: DEBUG
+
+server:
+  error:
+    include-stacktrace: never
