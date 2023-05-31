@@ -40,4 +40,7 @@ public class AnimeService {
     return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Anime not found"));
   }
 
+  public Mono<Void> delete(int id) {
+    return animeRepository.deleteById(id);
+  }
 }
