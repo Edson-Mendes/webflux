@@ -36,11 +36,12 @@ public class AnimeService {
         .then();
   }
 
+  public Mono<Void> delete(int id) {
+    return animeRepository.deleteById(id);
+  }
+
   public <T> Mono<T> monoResponseStatusNotFoundException() {
     return Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Anime not found"));
   }
 
-  public Mono<Void> delete(int id) {
-    return animeRepository.deleteById(id);
-  }
 }
