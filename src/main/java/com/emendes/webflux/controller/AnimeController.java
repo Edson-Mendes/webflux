@@ -37,4 +37,10 @@ public class AnimeController {
     return animeService.save(anime);
   }
 
+  @PutMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public Mono<Void> update(@PathVariable(name = "id") int id, @Valid @RequestBody Anime anime) {
+    return animeService.update(anime.withId(id));
+  }
+
 }
