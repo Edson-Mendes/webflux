@@ -17,6 +17,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.*;
 
 @ExtendWith(SpringExtension.class)
@@ -39,6 +41,9 @@ class AnimeServiceTest {
 
     BDDMockito.when(animeRepositoryMock.save(any(Anime.class)))
         .thenReturn(Mono.just(anime));
+
+    BDDMockito.when(animeRepositoryMock.saveAll(List.of(AnimeCreator.createAnimeToBeSaved(), AnimeCreator.createAnimeToBeSaved())))
+        .thenReturn(Flux.just(anime, anime));
 
     BDDMockito.when(animeRepositoryMock.deleteById(anyInt()))
         .thenReturn(Mono.empty());
@@ -80,6 +85,32 @@ class AnimeServiceTest {
         .expectSubscription()
         .expectNext(anime)
         .verifyComplete();
+  }
+
+  @Test
+  @DisplayName("saveAll returns Flux of Anime when create successful")
+  void saveAll_ReturnsFluxOfAnime_WhenCreateSuccessful() {
+    Anime animeToBeSaved = AnimeCreator.createAnimeToBeSaved();
+
+    StepVerifier.create(animeService.saveAll(List.of(animeToBeSaved, animeToBeSaved)))
+        .expectSubscription()
+        .expectNext(anime, anime)
+        .verifyComplete();
+  }
+
+  @Test
+  @DisplayName("saveAll returns Mono Error when anime on the list contains invalid fields")
+  void saveAll_ReturnsMonoError_WhenAnimeOnTheListContainsInvalidFields() {
+    BDDMockito.when(animeRepositoryMock.saveAll(anyIterable()))
+        .thenReturn(Flux.just(anime, anime.withName("")));
+
+    Anime animeToBeSaved = AnimeCreator.createAnimeToBeSaved();
+
+    StepVerifier.create(animeService.saveAll(List.of(animeToBeSaved, animeToBeSaved.withName(""))))
+        .expectSubscription()
+        .expectNext(anime)
+        .expectError(ResponseStatusException.class)
+        .verify();
   }
 
   @Test

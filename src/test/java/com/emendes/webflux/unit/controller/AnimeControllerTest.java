@@ -17,6 +17,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 
@@ -41,6 +43,9 @@ class AnimeControllerTest {
 
     BDDMockito.when(animeServiceMock.delete(anyInt()))
         .thenReturn(Mono.empty());
+
+    BDDMockito.when(animeServiceMock.saveAll(List.of(AnimeCreator.createAnimeToBeSaved(), AnimeCreator.createAnimeToBeSaved())))
+        .thenReturn(Flux.just(anime, anime));
   }
 
   @Test
@@ -69,6 +74,17 @@ class AnimeControllerTest {
     StepVerifier.create(animeController.save(animeToBeSaved))
         .expectSubscription()
         .expectNext(anime)
+        .verifyComplete();
+  }
+
+  @Test
+  @DisplayName("saveBatch returns Flux of Anime when create successful")
+  void saveBatch_ReturnsFluxOfAnime_WhenCreateSuccessful() {
+    Anime animeToBeSaved = AnimeCreator.createAnimeToBeSaved();
+
+    StepVerifier.create(animeController.saveBatch(List.of(animeToBeSaved, animeToBeSaved)))
+        .expectSubscription()
+        .expectNext(anime, anime)
         .verifyComplete();
   }
 
