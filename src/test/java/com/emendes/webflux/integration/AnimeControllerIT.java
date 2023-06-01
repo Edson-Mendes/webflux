@@ -14,10 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest
@@ -39,12 +44,12 @@ class AnimeControllerIT {
     BDDMockito.when(animeRepositoryMock.findById(1)).thenReturn(Mono.just(anime));
 
     BDDMockito.when(animeRepositoryMock.findById(100)).thenReturn(Mono.empty());
-//
-//    BDDMockito.when(animeRepositoryMock.save(any(Anime.class)))
-//        .thenReturn(Mono.just(anime));
-//
-//    BDDMockito.when(animeRepositoryMock.deleteById(anyInt()))
-//        .thenReturn(Mono.empty());
+
+    BDDMockito.when(animeRepositoryMock.save(any(Anime.class)))
+        .thenReturn(Mono.just(anime));
+
+    BDDMockito.when(animeRepositoryMock.deleteById(anyInt()))
+        .thenReturn(Mono.empty());
   }
 
   @Test
@@ -94,6 +99,94 @@ class AnimeControllerIT {
         .expectStatus().isNotFound()
         .expectBody()
         .jsonPath("$.status").isEqualTo(404);
+  }
+
+  @Test
+  @DisplayName("save create Anime when create successful")
+  void save_CreateAnime_WhenCreateSuccessful() {
+    Anime animeToBeSaved = AnimeCreator.createAnimeToBeSaved();
+
+    testClient
+        .post()
+        .uri("/animes")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(BodyInserters.fromValue(animeToBeSaved))
+        .exchange()
+        .expectStatus().isCreated()
+        .expectBody(Anime.class)
+        .isEqualTo(anime);
+  }
+
+  @Test
+  @DisplayName("save returns error when name is empty")
+  void save_ReturnsError_WhenNameIsEmpty() {
+    Anime animeToBeSaved = AnimeCreator.createAnimeToBeSaved().withName("");
+
+    testClient
+        .post()
+        .uri("/animes")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(BodyInserters.fromValue(animeToBeSaved))
+        .exchange()
+        .expectStatus().isBadRequest()
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(400);
+  }
+
+  @Test
+  @DisplayName("delete returns no content when delete successful")
+  void delete_ReturnsNoContent_WhenDeleteSuccessful() {
+    testClient
+        .delete()
+        .uri("/animes/{id}", 1)
+        .exchange()
+        .expectStatus().isNoContent();
+  }
+
+  @Test
+  @DisplayName("update returns no content when update successful")
+  void update_ReturnsNoContent_WhenUpdateSuccessful() {
+    Anime animeToBeUpdated = AnimeCreator.createValidUpdatedAnime();
+
+    testClient
+        .put()
+        .uri("/animes/{id}", 1)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(BodyInserters.fromValue(animeToBeUpdated))
+        .exchange()
+        .expectStatus().isNoContent();
+  }
+
+  @Test
+  @DisplayName("update returns Error when Anime does not exist")
+  void update_ReturnsError_WhenAnimeDoesNotExist() {
+    Anime animeToBeUpdated = AnimeCreator.createValidUpdatedAnime();
+
+    testClient
+        .put()
+        .uri("/animes/{id}", 100)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(BodyInserters.fromValue(animeToBeUpdated))
+        .exchange()
+        .expectStatus().isNotFound()
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(404);
+  }
+
+  @Test
+  @DisplayName("update returns a mono Error when Name is empty")
+  void update_ReturnsMonoError_WhenNameIsEmpty() {
+    Anime animeToBeUpdated = AnimeCreator.createValidUpdatedAnime().withName("");
+
+    testClient
+        .put()
+        .uri("/animes/{id}", 100)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(BodyInserters.fromValue(animeToBeUpdated))
+        .exchange()
+        .expectStatus().isBadRequest()
+        .expectBody()
+        .jsonPath("$.status").isEqualTo(400);
   }
 
 }
