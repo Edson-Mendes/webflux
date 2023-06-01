@@ -13,6 +13,7 @@ import javax.validation.constraints.NotBlank;
 @Builder
 @With
 @Table(name = "t_anime")
+@EqualsAndHashCode
 public class Anime {
 
   @Id
