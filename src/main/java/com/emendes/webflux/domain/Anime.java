@@ -12,8 +12,8 @@ import javax.validation.constraints.NotBlank;
 @Setter
 @Builder
 @With
-@Table(name = "t_anime")
 @EqualsAndHashCode
+@Table(name = "t_anime")
 public class Anime {
 
   @Id
